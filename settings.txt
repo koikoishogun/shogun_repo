@@ -1,0 +1,2 @@
+CLEARDB_DATABASE_URL  - mysql://bd5004c1a6c5f4:3d9804d9@us-cdbr-iron-east-05.cleardb.net/heroku_34945d82ec8119c?reconnect=true--sharubati
+mysql://b0cb1865ae2f32:3dd89c15@us-cdbr-iron-east-05.cleardb.net/heroku_f6c8b8b73260035?reconnect=true

@@ -7,9 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class post extends Model
 {
     //
-	protected $fillable=["title","name","body","category","files"];
-	public function comments(){
-		return $this->hasMany('App\comment');
-		
-	}
+    protected $fillable=["post","tag","title","feature","link"];
+
+    public function comments(){
+    	return $this->hasMany("App\comment");
+    }
+    public function tags(){
+    	return $this->hasOne('App\tag');
+    }
+    public function blogPhotos(){
+    	return $this->hasMany('App\blogPhoto');
+    }
+   
+
 }
