@@ -313,19 +313,7 @@ class blog extends Controller
                             $resp["error"]="Oops something happened...Failed to add post.";
                             
                         }
-                        
-
-                        
-
-			    		
-		            
-
-    		
-                 
-
-
-
-    	}
+               }
     	else{
     		$resp["error"]=abort(404,"Unauthorized access ")->render();
 
@@ -390,7 +378,8 @@ class blog extends Controller
     //return update form
     public function updateForm($postid){
         //fetch post
-        $fpos=po::find($postid);
+        return "hit";
+        /*$fpos=po::find($postid);
         if ($fpos) {
             # code...
             $det['post']=$fpos;
@@ -407,6 +396,8 @@ class blog extends Controller
             $foter=$this->getFooterimage($postid);
             
             //loop through all footer ids
+            //
+            $fot=[];
             foreach ($foter as  $value) {
                 # code...
                 //return img for each id
@@ -414,7 +405,7 @@ class blog extends Controller
                 //check if image exists
                 if($fIm){
                     //save to an array
-                    $fot[]="".$fIm;
+                    $fot[]=$fIm;
                 }
 
             }
@@ -435,13 +426,14 @@ class blog extends Controller
             }
 
             //$formDet=["post"=>$fpos];
+            return var_dump($det);
             $resp["html"]=view("blog.updateForm",$det)->render();
         }
         else
         {
             $resp["error"]="Error.Couldn't find post.";
         }
-        return response()->json($resp);
+        return response()->json($resp);*/
 
 
         
