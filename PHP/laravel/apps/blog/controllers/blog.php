@@ -10,31 +10,34 @@ use App\reply as re;
 use App\filezz as zz;
 use App\blogPhoto as blgp;
 use App\tag as tg;
+use App\viewCounter as vC;
 //use Intervention\Image\ImageManager as Image;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use App\Events\newPost as npp;
-require  "imgesController.php";
+use App\Traits\handleFile;
 
 class blog extends Controller
 {
-
+    use handleFile;
+    
     //return  blog home for admin
     public function home( Request $request){
 
     	//$resp['html']=view("blog.home")->render();
     	$allp=po::orderBy("created_at","desc")->SimplePaginate(10);
     	$cAll=po::all()->count();
-        $popo=po::all();
+        //$popo=po::all();
         //get header images  for each post
-         $postH=$this->showHeaderFile($popo);
+         $postH=$this->showHeaderFile($allp);
 
        
         //get footer image for each post
-        $getFi=$this->showFooterFile($popo);
+        //$getFi=$this->showFooterFile($popo);
         //$getFi=$this->getFooterimage(4);
         //get array of tags for each post
-        $postTa=$this->showAllPosTags($popo);
+        $postTa=$this->showAllPosTags($allp);
         $det["posts"]=$allp;
         $det['count']=$cAll;
         $det['headerI']=$postH;
@@ -52,29 +55,145 @@ class blog extends Controller
     //return user home
     //return all posts with header images
     public function userHome(){
-            $allp=po::orderBy("created_at","desc")->SimplePaginate(20);
+            
             //$allF=po::where("feature","feature")->get();
             //show all image names getFileName
-            
-            $popo=po::all();
-            //get header images  for each post
-             $postH=$this->showHeaderFile($popo);
+            $mostRecent=po::orderBy('created_at','desc')->first();
+            //most recent array
+            $mar=[];
+            $oth=[];
+            //check if most recnt exists
+            if ($mostRecent) {
+                # exclude from other
+                $mid=$mostRecent->id;
+                $others=po::orderBy("created_at","desc")->whereNotIn('id',[$mid])->SimplePaginate(10);
+                //$popo=po::all();
+                //get header images  for most recent post
+                 $moH=$this->headerFileName($mid);
+                 //check if it exists
+                 if ($moH) {
+                     #add to arrays
+                     $mar['head']=$moH;
+                 }
+                 //get footer image for most recent post
+                 $moF=$this->getFooterimage($mid);
+                 //check if it exists
+                 if ($moF) {
+                     #save to array 
+                     $mar['foot']=$moF;
+                 }
+                 //get tags for most recent
+                 $moT=$this->getPostTag($mid);
+                 //check if it exists
+                 if ($moT) {
+                     $mar['tags']=$moT;
+                 }
+                 if ($others) {
+                     # code...
+                        //get header for other posts
+                     $othH=$this->showHeaderFile($others);
+                     //check if it exists
+                     if ($othH) {
+                         $oth['header']=$othH;
+                     }
+                     //get tags for others
+                     $othT=$this->showAllPosTags($others);
+                     if ($othT) {
+                         $oth['tags']=$othT;
+                     }
+                     $det['othDet']=$oth;
+                     $det["others"]=$others;
+                 }
+                 
+                //get array of tags for each post
+                $det['recent']=$mostRecent;
+                $det['mDet']=$mar;
+                return view("blog.user.oneView",$det);
+                
+               
 
-           
-            //get footer image for each post
-            $getFi=$this->showFooterFile($popo);
-            //$getFi=$this->getFooterimage(4);
-            //get array of tags for each post
-            $postTa=$this->showAllPosTags($popo);
-            $det["posts"]=$allp;
-            $det['headerI']=$postH;
-            //$det['footerI']=$getFi;
-            $det['tags']=$postTa;
-            //$det['fe']=$allF;
-            //$resp['html']=view("welcome")->render();
-            //return response()->json($resp);
-             return view("blog.userHome",$det);
-            //return var_dump($getFi);
+        }
+        else{
+
+                return view("blog.user.oneView");
+                }
+            
+             
+             
+
+    }
+    //return two blogs for user home
+    public function userViewTwo(){
+        $zxc=$this->getNumberBlog(2);
+        if ($zxc) {
+           $resp['html']=$zxc;
+        }
+        else{
+            $resp['error']="Oops...An error occured cannot retrieve post at this momment.";
+        }
+        return response()->json($resp);
+
+    }
+    //get the most recent two blogs
+    //input : int number
+    //return collection of posts
+    public function  getNumberBlog($number){
+        $getp=po::orderBy('created_at','desc')->SimplePaginate($number);
+        //check if exists
+        if ($getp) {
+            //get header and footer 
+            $det=[];
+            foreach ($get as  $value) {
+                //get header ad footer image 
+                $grh=$this->headerFileName($value->id);
+                //check if it exists
+                if ($grh) {
+                    $data['header']=$grh;
+                }
+                //get footer
+                $fiy=$this->getFooterimage($value->id);
+                //check if exists
+                if($fiy){
+                 $data['footer']=$fiy;
+                }
+                //get tags
+                $gtf=$this->getPostTag($value->id);
+                //check if exists
+                if ($getf) {
+                   $data['tags']=$gtf;
+                }
+                //get title
+                $rtyu=$value->title;
+                //check 
+                if ($rtyu) {
+                    $data['title']=$rtyu;
+                }
+                //get post
+                $efgn=$value->post;
+                if ($efgn) {
+                   $data['post']=$efgn;
+                }
+                //get time
+                $er=$value->created_at->diffForHumans()
+                if ($er) {
+                    # code...
+                    $det['time']=$er;
+                }
+                if( !empty($data)  ){
+                    $det["post"]=$data;
+
+                }
+
+
+
+            }
+            return view("blog.user.welcome",$det)->render();
+
+            
+        }
+        else{
+            return false;
+        }
 
     }
     //Check if master 
@@ -84,12 +203,18 @@ class blog extends Controller
     public function  showHeaderFile($pp){
          $getatgPOst=$pp;
          $postH=[];
+         $errors=[];
          //$hids=[];
             foreach ($getatgPOst as  $value) {
                 # code...
                 
                 $geHi=$this->headerFileName($value->id);
-                $postH[$value->id]=$geHi;
+                //check if exists
+                if($geHi){
+                    $postH[$value->id]=$geHi;
+                }
+                
+               
                  
                 
                
@@ -136,11 +261,11 @@ class blog extends Controller
                     # code...
                    
                        //$getimage=$this->getImageTag($fids);
-                        $postFi[$value->id]=$getFi;
+                        $resp[$value->id]=$getFi;
                 }
                 //return $getFi;
                  //loop through  all footer ids  to get  images
-                 foreach ($postFi as $kay => $val) {
+                 /*foreach ($postFi as $kay => $val) {
                      # code...
                     //compare to id
                     if( $kay == $value->id){
@@ -159,7 +284,7 @@ class blog extends Controller
 
                     }
                     
-                 }
+                 }*/
                 
                  
             }
@@ -313,7 +438,19 @@ class blog extends Controller
                             $resp["error"]="Oops something happened...Failed to add post.";
                             
                         }
-               }
+                        
+
+                        
+
+			    		
+		            
+
+    		
+                 
+
+
+
+    	}
     	else{
     		$resp["error"]=abort(404,"Unauthorized access ")->render();
 
@@ -373,45 +510,91 @@ class blog extends Controller
          return response()->json($resp);
     	
     }
+    //return  header and footer image  divsfrom post id
+    //input : post id 
+    //output : array "footer"=>"footer div and id " ,"header"=>"heaer div and id"
+    public function  imageId($id){
+        $header=blgp::where('post_id',$id)->where('header','header')->first();
+        $footer=blgp::where('post_id',$id)->where('footer','foot')->orderBy('created_at','asc')->get();
+        $resp=[];
+        //check for header
+        if ($header != null) {
+            //return img div
+            $Headerimg=$this->returnIMG($header->file_id);
+            //check if exists
+            if($Headerimg){
+                $resp['header']=$Headerimg;
+
+            }
+            else{
+                $resp['header']=false;
+            }
+            
+        }
+        else{
+                $resp['header']=false;
+        }
+        //cheeck for footer
+        if ($footer != null) {
+            $fi=[];
+            foreach ($footer as  $value) {
+                # get image divs
+                $fImg=$this->returnIMG($value->file_id);
+                //check for 
+                if($fImg){
+                    $fi[]=$fImg;
+
+                }
+            }
+            //check
+            if ($fi != null) {
+                # code...
+                $resp['footer']=$fi;
+            }
+            else{
+               $resp['footer']=false;
+            }
+        }
+        else{
+            $resp['footer']=false;
+        }
+        //check for response
+        if ($resp != null) {
+            return $resp;
+            
+        }
+        else{
+            return false;
+
+        }
+
+
+    }
 
 
     //return update form
     public function updateForm($postid){
         //fetch post
-        return "hit";
-        /*$fpos=po::find($postid);
+        $fpos=po::find($postid);
         if ($fpos) {
             # code...
             $det['post']=$fpos;
-            //get header image for post
-             $header="".$this->returnIMG($this->getHeaderImage($postid));
-             if( $header){
-                $det['header']=$header;
-
-             }
-
-
-
-            //get footer image for post
-            $foter=$this->getFooterimage($postid);
-            
-            //loop through all footer ids
-            //
-            $fot=[];
-            foreach ($foter as  $value) {
-                # code...
-                //return img for each id
-                $fIm=$this->returnIMG($value);
-                //check if image exists
-                if($fIm){
-                    //save to an array
-                    $fot[]=$fIm;
-                }
-
+            //get headerr and footer
+            $im=$this->imageId($postid);
+            //return var_dump($im);
+            if($im['header']){
+             $det['header']=$im['header'];
             }
-            if($fot){
-                $det['foot']=$fot;
-
+            else{
+                $det['header']=false;
+            }
+            //get footer
+            if ($im['footer']) {
+                #
+                $det['foot']=$im['footer'];
+            }
+            else{
+                $det['foot']=false;
             }
 
 
@@ -426,14 +609,14 @@ class blog extends Controller
             }
 
             //$formDet=["post"=>$fpos];
-            return var_dump($det);
+            //return var_dump($det['fot']);
             $resp["html"]=view("blog.updateForm",$det)->render();
         }
         else
         {
             $resp["error"]="Error.Couldn't find post.";
         }
-        return response()->json($resp);*/
+        return response()->json($resp);
 
 
         
@@ -441,12 +624,14 @@ class blog extends Controller
 
     }
 
+
+
     //save a updated post
     public function updatePost(Request $request){
-        $potid=$request->postId;
         //check if request is method POST
         if($request->isMethod("POST") ){
-                //check for title
+            $potid=$request->postId;
+                           //check for title
                             if($request->title){
                                  $det['title']=$request->title;
                             }
@@ -481,7 +666,7 @@ class blog extends Controller
                             
                         
                         //check for header image
-                        if($request->headerImage){
+                        if($request->headerImage &&  $request->headerImage != null ){
                             //save header image
                             $hedId=$request->headerImage;
                             $findHeadr=zz::find($hedId);
@@ -589,9 +774,9 @@ class blog extends Controller
         $rt=po::find($postid);
         $det['post']=$rt;
         //get header image
-        $cbn=$this->getHeaderImage($postid);
+        //$cbn=$this->getHeaderImage($postid);
         //get header image as a html tag
-        $cvm=$this->headerFileName($cbn);
+        $cvm=$this->headerFileName($postid);
         //check if exists
         if($cvm){
            $getHeaderImg=$cvm; 
@@ -603,18 +788,8 @@ class blog extends Controller
         if ($awer) {
             # code...
             //loop through all footer to get names
-            $getFooteri=[];
-            foreach ($awer as  $value) {
-                # code...
-                $sdff=$this->footerFileName($value);
-                //check if img is returned
-                if($sdff){
-
-                  $getFooteri[]=$sdff;
-
-                }
-            }
-            $det['footer']=$getFooteri;
+           
+            $det['footer']=$awer;
 
         }
         //check for tags
@@ -635,7 +810,8 @@ class blog extends Controller
     //user view one post
     public function userViewPost($postid){
         $rt=po::find($postid);
-        $dfg=po::orderBy('created_at','desc')->SimplePaginate(10);
+        $dfg=po::orderBy('created_at','desc')->SimplePaginate(15);
+        //return var_dump($dfg);
         $ert=po::all();
        
 
@@ -673,8 +849,8 @@ class blog extends Controller
          
         //return all tags
         $QaSD=$this->showAllPosTags($ert);
-        $det=["post"=>$rt,"posts"=>$dfg,"head"=>$fg,"tag"=> $QaSD,"footer"=>$getFooteri];
-        //return var_dump($fg);
+       $det=["post"=>$rt,"posts"=>$dfg,"head"=>$fg,"tag"=>$QaSD,"footer"=>$getFooteri];
+       //return var_dump($det['posts']);
         
 
 
@@ -688,30 +864,18 @@ class blog extends Controller
 
 
     }
+    //view a single post for user
     public function userViewOne($postid){
         $rt=po::find($postid);
-        //$dfg=po::orderBy('created_at','desc')->SimplePaginate(10);
-        //return header image for post
-        //get heaader file name
-        $asd=$this->headerFileName($this->getHeaderImage($postid));
-          
-
-          //get footer image ids
-            $rty=$this->getFooterimage($postid);
-            //loop through all to get names
-            $fot=[];
-            foreach ($rty as  $value) {
-                # code...
-                $sxcv=$this->footerFileName($value);
-                if($sxcv){
-                    $fot[]=$sxcv;
-
-                }
-
-            }
+        //get header
+        $asd=$this->headerFileName($postid);
+        //get footer image ids
+        $onF=$this->getFooterimage($postid);
+            
          //get tags for post
          $zxc=$this->getPostTag($postid);
-         $det=["post"=>$rt,"tags"=>$zxc,"head"=>$asd,"footer"=>$fot];
+         $det=["post"=>$rt,"tags"=>$zxc,"head"=>$asd,"footer"=>$onF];
+         
              
         
         $resp['html']=view("blog.user.viewPost",$det)->render();
@@ -749,7 +913,7 @@ class blog extends Controller
     public function unfeature($postid){
         $fer=po::find($postid);
         if($fer->feature == "feature"){
-            $fer->feature="";
+            $fer->feature="asd";
             $sasd=$fer->save();
             if($sasd){
                 $resp['html']="feature";
@@ -778,11 +942,13 @@ class blog extends Controller
     public function saveUSerReply(Request $request){
         if(   $request->isMethod('POST')  ){
             //check for comment id
+            //return $request->ghjl;
             if($request->ghjl){
                 $det['name']=$request->name;
                 $det['email']=$request->email;
                 $det['text']=$request->text;
                 $det['comment_id']=$request->ghjl;
+                //return $det['comment_id'];
                 $saveReplirs=re::create($det);
                 //check whether it saved successfully
                 if($saveReplirs){
@@ -798,7 +964,8 @@ class blog extends Controller
 
             }
             else{
-                return "cvmvchmn";
+                //no id
+               $resp['error']="Error.Something happened.";
             }
 
             //REPLY DETails
@@ -811,8 +978,9 @@ class blog extends Controller
 
         }
         else{
-            return abort(404,"Unauthorized access.");
+            $resp['err4']=abort(404,"Unauthorized access.")->render();
         }
+        return response()->json($resp);
 
     }
 
@@ -820,9 +988,9 @@ class blog extends Controller
     public function userViewAllReplies($cid){
         //check if comment id is present error if not
         if($cid){
-            $allreg=re::where('comment_id',$cid)->orderBy('created_at','desc')->SimplePaginate(10);
+            $allreg=re::where('comment_id',$cid)->orderBy('created_at','desc')->SimplePaginate(5);
             $mesgCount=re::where('comment_id',$cid)->get()->count();
-            $resp['html']=view('blog.reply.user.view',['replies'=>$allreg,'count'=>$mesgCount])->render();
+            $resp['html']=view('blog.reply.user.view',['replies'=>$allreg,'count'=>$mesgCount,'cid'=>$cid])->render();
 
         }
         else{
@@ -833,7 +1001,7 @@ class blog extends Controller
 
     }
 
-    //return reply home for adn\min
+    //return reply home for admin
     public function adminReplyHome($cid){
         $ret=re::where("comment_id",$cid)->orderBy("created_at","desc")->get();
          $cidf=$cid;
@@ -868,7 +1036,7 @@ class blog extends Controller
 
             }
             else{
-                return "cvmvchmn";
+                $rep['error']="Error.Failed to find comment.";
             }
 
             //REPLY DETails
@@ -881,8 +1049,9 @@ class blog extends Controller
 
         }
         else{
-            return abort(404,"Unauthorized access.");
+            $resp['err4']=abort(404,"Unauthorized access.")->render();
         }
+        return response()->json($resp);
 
     }
 
@@ -923,140 +1092,11 @@ class blog extends Controller
         
     }
 
-    //Save  a blog post image,name of atrribute for input tag
-    public function addFormImage( $request,$name){
-        if( $request->isMethod("POST") ){
-                    //get input file
-                    if($request->hasFile($name) &&  $request->file($name)->isValid()          ){
-                                $file_types=$request->file($name)->getMimeType() == "image/jpeg" || $request->file($name)->getMimeType() == "image/png" || $request->file($name)->getMimeType() == "image/gif";    
-
-                                if($file_types){
-                                    $rew=file_get_contents( $request->file($name) );
-                                    //$rew=$request->file($name)->store("public/formUploads");
-                                    //$storeSaBlo=file_get_contents($request->file($name));
-
-                                    $addInputDet=$this->inputFileInfo($request,$name);
-                                   //return var_dump($addInputDet);
-                                    foreach ($addInputDet as $key => $value) {
-                                        if( $key == "name" ){
-                                            $da['name']=$value;
-
-                                        }
-                                        if( $key == "type" ){
-                                            $da['type']=$value;
-
-                                        }
-                                        if( $key == "size" ){
-                                            $da['size']=$value;
-
-                                        }
-                                        # code...
-                                        
-                                    }
-                                    //return var_dump($det);
-
-                                    //$da["path"]=$this->dataUri($rew,$det['type']);
-                                    $zxc['img']=$this->dataUri($rew,$da['type']);
-                                    $zxc['w']=15;
-                                    $zxc['h']=15;
-                                    //$zxc['x']=56;
-                                      $crop=new imgesController();
-                                    $cropped=$crop->cropImage($zxc);
-                                    $da['path']=$cropped;
-                                    //return   $kk; //var_dump();
-                                    //$det['file']=$rew;
-                                    //return  var_dump($det);
-                                    $saveFile=zz::create($da);
-                                    
-                                    //return $saveFile;
-                                    //check if successfully added
-                                    if(   $saveFile){
-                                        if($saveFile->id){
-                                            //return $saveFile->id;
-                                            $det['id']=$saveFile->id;
-                                            //return  var_dump($resp);
-                                            //return $resp;
-                                        }
-                                        else{
-                                            //return "";
-                                            //return false;
-                                            $det['error']="Error.No id present";//
-                                            //return $resp;
-
-                                        }
-                                        
-
-                                    }
-                                    else{
-                                        //return "Error.Failed to save file.";
-                                        //return false;
-                                        $det['error']="Error.Failed to save file.";
-
-                                    }
-
-                                }
-                                else{
-                                    $det['error']="Error.Only images allowed";
-                                }
-
-                    }
-                    //check for file types
-                    
-                    else{
-                        //return "Error.File failed to upload properly.";
-                        $det['error']="Error.File failed to upload properly.";
-                         //return false;
-
-                    }
-
-
-
-           //return details
-           //return  var_dump($det);
-           return  $det;
-
-
-         
-        }
-        else{
-            return abort(404,"Unauthorized acess.");
-        }
-
-    }
-    //return file name type and size from input request
-    //name of the input tag
-    //return array det contains name ,type,size keys
-    public function  inputFileInfo(Request $request,$name){
-        //check if file  has input && input is valid
-        $checkfile=$this->inputFileValid($request,$name);
-        if($checkfile){
-            //check for ndetails of files
-            $det['name']=$request->file($name)->getClientOriginalName();
-            $det['type']=$request->file($name)->getMimeType();
-            $det['size']=$request->file($name)->getClientSize();
-            if($det['name'] && $det['type'] &&  $det['size']){
-                return $det;
-
-            }
-            else{
-                return false;
-            }
-            
-            
-
-        }
-        else{
-            //$resp['error']="Error.File failed to upload properly.";
-            return false;
-
-        }
-
-
-    }
+    
     //check if request has file and is valid
     //name of selector
     //return false for empty or invalid upload ||  true
-    public function  inputFileValid(Request $request,$name){
+    /*public function  inputFileValid(Request $request,$name){
         if( $request->file($name) && $request->file($name)->isValid()  ){
             return true;
 
@@ -1066,7 +1106,7 @@ class blog extends Controller
             return false;
         }
 
-    }
+    }*/
     //add header image
     public function addHeaderImage(Request $request){
         $name="file";
@@ -1101,18 +1141,9 @@ class blog extends Controller
         $qwer=zz::find($id);
         //check if file exists
         if($qwer){
-           //$content=base64_encode($qwer->file);
+           
             $path=$qwer->path;
-            //$type=$qwer->type;
-
-           //header('Content-type: '.$type);
-            //echo $content;
-
-
-            //return response($content)->header("Content-Type",$type);
-            //$tagg="<img  src='data:".$type.";base64,".$content."'/>";
-            //return $tagg;
-            //$resp['html']=$tagg;
+            
            return view("blog.image",["path"=>$path,"id"=>$id]);
 
 
@@ -1199,7 +1230,7 @@ class blog extends Controller
               $qwr=$xcv->where("footer","foot")->get();
               //save header
               if($ert){
-                   $herN=$ert->files->name;
+                   $herN=$ert->files->path;
                    if($herN){
                      $resp['head']=$herN;
 
@@ -1209,10 +1240,11 @@ class blog extends Controller
              //save footer
               if($qwr){
                    //loop through all footer
+                $fi=[];
                  foreach($qwr as $value ){
                     //check for files
                     if ($value->files->name       ) {
-                        $fi[]=$value->files->name;
+                        $fi[]=$value->files->path;
                         # code...
                     }
 
@@ -1236,25 +1268,28 @@ class blog extends Controller
     }
 
     //get header file name
-    //input file id
+    //input post id
     public function  headerFileName($id){
-             $xcv=zz::find($id);
-
-              if($xcv){
-                   $herN=$xcv->path;
-                   if($herN){
-                     $resp=$herN;
-                     return $resp;
-
-                   }
-                   else{
-                    return false;
-                   }
-
-              }
-              else{
-                return false;
-              }
+             //$xcv=zz::find($id);
+             //get header image for post
+             $hi=blgp::where("header","header")->where("post_id",$id)->first();
+           if ($hi) {
+               # code...
+              $asd=$this->getFilePathDB($hi->file_id);
+                    if ($asd) {
+                        # code...
+                        return $asd;
+                    }
+                    else{
+                        return false;
+                    }
+                   
+            }
+           
+           else{
+            return false;
+           }
+          
 
 
 
@@ -1302,8 +1337,15 @@ class blog extends Controller
                  //$ert=[];
                  $yes=[];
                  foreach ( $footerImage as  $value) {
-                     # code...
-                       $yes[]=$value->file_id;
+                     # get the file name
+                     $fnme=$this->getFilePathDB($value->file_id);
+                     //check if file mae exists
+                     if ($fnme) {
+                         # save to array
+                        $yes[]=$fnme;
+
+                     }
+                       
                      //var_dump($value->file_id) ;
                  }
                  //return $yes;
@@ -1490,6 +1532,7 @@ class blog extends Controller
         }
         return response()->json($resp);
 
+
     }
     //get a generic img tag
     public function returnIMG($id){
@@ -1499,7 +1542,7 @@ class blog extends Controller
           
             $path=$qwer->path;
             
-           return view("blog.imageGeneric",["path"=>$path,"id"=>$id]);
+           return view("blog.image",["path"=>$path,"id"=>$id])->render();
 
 
 
@@ -1509,80 +1552,390 @@ class blog extends Controller
         }
 
     }
+    /*
+        *Link functions start here
+        *
+        *
+        *
+        *
+        *
+        *
+        *
+        *
 
-    //add link to a particular post
-    public function addLink($link,$id){
-        $checkifiko=po::where("id",$id)->where("link",$link)->first();
-        if($checkifiko){
-             $resp["error"]="Oops....That link already exists.";
+    */
+    //return link form
+    public function linkForm($id,$link=null){
+        //check for id
+        if ($id) {
+            $det['id']=$id;
+            //check for link
+            if ( isset($link) ) {
+                //save link
+                $det['link']=$link;
+               
+            }
+            $resp['html']=view('blog.link.form',$det)->render();
+            
         }
         else{
-            $rret=po::find($id);
-            if($rret){
-                $det=["link"=>$link];
-                $jert=$rret->update($det);
-                if($jert){
-                    $resp['html']="http//wambuikamau.com/blog/".$rret->link;
-
-                }
-                else{
-                    $resp['error']="Failed to add link.";
-
-                }
-
-            }
-
+            $resp['error']="An error occured.Try reloading page.";
 
         }
-        return response()->json($resp);
+        return $resp;
+        
+
+    }
+    //return link form for update
+    public function updateFormLink(Request $request){
+        if ($request->isMethod("POST")) {
+            //check  for id an link
+            if ($request->id && $request->link) {
+                //get form
+                $up=$this->linkForm($request->id,$request->link);
+                //check if exists
+                if ($up) {
+                    $resp=$up;
+                }
+                
+            }
+            else{
+                $resp['error']=abort(123,'Oops...something happened')->render();
+            }
+            return response()->json($resp);
+            
+        }
+
+    }
+    //view link without post details
+    public function  getLink($link){
+       
+        if ($link) {
+            # code...
+            $det['link']=$link;
+        }
+        
+        $vovo=view("blog.link.view",$det)->render();
+        $resp['html']=$vovo;
+        return $resp;
+
+    }
+
+    //add link to a particular post
+    public function addLink(Request $request){
+        
+        //check if request is post
+        if ($request->isMethod('POST')) {
+
+            #CHECK IF LINK ALREADY EXISTS
+            #CHECK FOR ID and link exists
+            if ($request->id  && $request->link) {
+                    $checkifiko=po::where("id",$request->id)->where("link",$request->link)->first();
+                    if($checkifiko){
+                         $resp["error"]="Oops....Cannot add link it already exists.";
+                    }
+                    else{
+                        $rret=po::find($request->id);
+                        if($rret){
+                            $det=["link"=>$request->link];
+                            $jert=$rret->update($det);
+                            if($jert){
+                                //return link
+                                $ty=$this->getLink($request->link);
+                                //check for html
+                                if ($ty['html']) {
+                                    # code...
+                                    $resp['html']=$ty['html'];
+                                }
+                                
+
+                            }
+                            else{
+                                $resp['error']="Failed to add link.";
+
+                            }
+
+                        }
+
+
+                    }
+            }
+            return response()->json($resp);
+            
+        }
+        
+        
     }
 
     //delete a link to a post
-    public function  delLink($id){
-        $ert=po::find($id);
-        if($ert){
-            $det['link']="";
-            $deg=$ert->update($det)->save();
-            if(  $deg ){
-                $resp['msg']="Link deleted successfully.";
+    public function  delLink(Request $request){
+        //check if post
+        if ($request->isMethod('POST')) {
+            # code...
+            $ert=po::find($request->id);
+            if($ert){
+                $id=$request->id;
+                $det['link']="";
+                $deg=$ert->update($det);
+                if(  $deg ){
+                    $resp['msg']="Link deleted successfully.";
+                    //return form  for link
+                    $foro=$this->linkForm($id);
+                    //check for html
+                    if ( isset($foro['html']) ) {
+                        $resp['html']=$foro['html'];
+
+                    }
+                    //check for error
+                    if ( isset($foro['error']) ) {
+                        # code...
+                        $resp['error']="Oops.Something happened.";
+                    }
+                                            
+
+                }
+                else{
+                    $resp['error']="Failed to delete link.";
+                }
 
             }
             else{
-                $resp['error']="Failed to delete link.";
+                $resp['error']="Error.Failed to find post.";
             }
+            return response()->json($resp);
+        }
+    }
+
+    //View post of a particular link
+    public function viewLink($link){
+        //get post with specific lilnk
+        $poL=po::where('link',$link)->first();
+        //check whether it exists
+        if ($poL) {
+            #if it exists check for header and footer images
+            #variable for holding link post details
+            $liId=$poL->id;
+            $linkDet=[];
+            //check for header
+            $liHead=$this->headerFileName($liId);
+            //check if header file exists
+            if ($liHead) {
+                # save to array
+                $linkDet['header']=$liHead;
+                //return $linkDet[];
+            }
+            //check for footer
+            $liFoot=$this->getFooterimage($liId);
+            //check if footer exists
+            if($liFoot){
+                $linkDet['footer']=$liFoot;
+                //return var_dump($linkDet);
+
+            }
+            //get tags for link post
+            $liTags=$this->getPostTag($liId);
+            //check if link tags exist
+            if($liTags){
+                $linkDet['tags']=$liTags;
+                //return var_dump($linkDet);
+
+            }
+            //get other posts aprt from link
+            $other=po::whereNotIn('id',[$liId])->orderBy('created_at','desc')->SimplePaginate(10);
+            //det array
+            $othDet=[];
+
+            //get other header images
+            $othHead=$this->showHeaderFile($other);
+            
+            //get other tags
+            $otherTags=$this->showAllPosTags($other);
+            //save to array
+            //check if other header exists
+            if ($othHead) {
+                # code...
+                $othDet['head']=$othHead;
+            }
+            
+            //check if other tags exist
+            if ($otherTags) {
+                # code...
+                $othDet['tags']=$otherTags;
+                
+            }
+            //return var_dump($othDet);
+            //save and send to view
+            $respo['li']=$poL;
+            $respo['liDet']=$linkDet;
+            $respo['other']=$other;
+            $respo['otherDet']=$othDet;
+            //return var_dump($respo['other']);
+            return view('blog.user.viewLinks',$respo);
+
+
+           
 
         }
         else{
-            $resp['error']="Error.Failed to find post";
+            return abort(404);
+
+        }
+  
+  }
+    //join post and other intermediary tables to retrieve all at once
+    //return all required blog tables joined
+    public function blogModel(){
+        $blgmodel=DB::table('posts')
+        ->join('blog_photos','posts.id','=','blog_photos.post_id')
+        ->join('comments','posts.id','=','comments.post_id')
+        ->join('tags','posts.id','=','tags.post_id')
+        ->select('posts.*','comments.comment','comments.name','comments.email','tags.tag','blog_photos.header'
+            ,'blog_photos.footer','blog_photos.file_id');
+        
+        return $blgmodel;
+
+
+    }
+    //get file path from any blogphoto
+     /*
+        *Like functions start here
+        *
+        *
+        *
+        *
+        *
+        *
+        *
+        *
+    */
+    public function addLike(Request$request){
+        //check if post
+        if ($request->isMethod("post") ) {
+            //check for post id 
+            if ( isset($request->id)) {
+                # code...
+                $ir=$request->id;
+                $getpo=po::find($ir);
+                //check for post
+                if ($getpo) {
+                    # code...
+                    //check if like is null is null
+                    if ($getpo->like != null) {
+                        # code...
+                        $looko=$getpo->like;
+                    }
+                    else{
+                        $looko=0;
+                    }
+                    $det['like']=++$looko;
+                    $addlop=$getpo->update($det);
+                    //check if upddated
+                    if ($addlop) {
+                        $resp['html']=$getpo->like;
+
+                        
+                    }
+                    else{
+                        $resp['error']="Oops...An error occured.";
+
+                    }
+                }
+                else{
+                    $resp['error']="Oops..Something happened";
+                }
+            }
+            else{
+                $resp['error']=abort(404)->render();
+
+            }
+            
+        }
+        else{
+            $resp['error']=abort(404)->render();
         }
         return response()->json($resp);
-    }
-
-    //View post of a particular post
-    public function viewLink($link){
-       $fg=po::where("link",$link)->first();
-       if($fg ){
-           //get header file
-
-           //sharubati
-           return view("blog.user.viewLinks"); 
-
-       }
-       else{
-        return redirect("/");
-
-       }
-
-
-       
 
     }
-    //return datat uri from scheme
-    public function dataUri($blob,$type){
-        $dataUri="data:".$type.";base64,".base64_encode($blob)."";
-        return $dataUri;
+    //remove like from post
+    //input post request
+    //return int updated number of likes
+    public function removeLike(Request $request){
+        //check if is post
+        if ($request->isMethod("POST")   ) {
+            //check for post id
+            if( $request->has('id')){
+                $idi=$request->id;
+                //find post
+                $popp=po::find($idi);
+                //check if exists
+                if ($popp) {
+                    #get like
+                    $pl=$popp->like;
+                    $pl--;
+                    #update details
+                    $deta=['like',$pl];
+                    $updf=$poppo->update($deta);
+                    if ($updf) {
+                        $resp['html']=$updf->like;
+                    }
+                    else{
+                        $resp['error']="Oops...Failed to remove like";
+                    }
+                }
+                else{
+                    $resp['error']="Oops...An error occured.";
+                }
+                
+            }
+
+            else{
+                $resp['error']="Oops.....An error occured.";
+                
+            }
+        }
+        else{
+            $resp['error']=abort(404)->render();
+        }
+        return response()->json($resp);
 
     }
+     /*
+        *View functions goes here
+        *
+        *
+        *
+        *
+        *
+        *
+        *
+        *
+    */
+     //add view count to a prticular post
+     public function addView($id){
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+                $ip = $_SERVER['HTTP_CLIENT_IP'];
+            } 
+        elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            } 
+        else {
+                $ip = $_SERVER['REMOTE_ADDR'];
+            }
+            $det['ip']=$ip;
+            $det['post_id']=$id;
+            $erhj=vC::create($det);
+            //check if created 
+            if($erhj){
+                //do nothing
+
+            }
+
+
+
+
+     }
+
+   
 
 
 

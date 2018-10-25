@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Traits\handleFile;
 use App\filezz as zz;
 use App\event as ev;
+use Illuminate\Support\Facades\Storage;
 
 class events extends Controller
 {
@@ -66,6 +67,35 @@ class events extends Controller
     	if ($request->isMethod('post')   ) {
     		//check if id is present
     		if($request->id){
+    			$id=$request->id;
+    			//find event
+    			$ehj=ev::find($id);
+    			//check if exist
+    			if ($ehj) {
+    				$fifi=$ehj->file_id;
+    				//delete records from db
+    				$jkl=ev::destroy($id);
+    				if ($jkl) {
+    					# code...
+    					//delete file from disk
+	    				$jina=$this->deleteFileSD($fifi);
+	    				//check if exists
+	    				if ($jina) {
+	    					return $jina;
+	    					
+	    				}
+	    				else{
+	    					$resp['error']="Oops...failed to delete event.";
+	    				}
+    				}
+    				else{
+    					$resp['error']="Oops...Can't delete event.";
+    				}
+    				
+    			}
+    			else{
+    				$resp['error']="Oops....Error cannot delete event.";
+    			}
 
     		}
     		else{
@@ -80,8 +110,25 @@ class events extends Controller
 
 
     }
-    //update event
-    public function  updateEvent(){
+    //save an updated event
+    public function  updateEvent(Request $request){
+    	//check if method is post
+    	if ($request->isMethod("post")  ) {
+    		//check for name
+    		if ($request->name) {
+    			$det['name']=$request->name;
+    		}
+    		//check for venue
+    		if ($request->venue) {
+    			$det['venue']=$request;
+    		}
+    		
+    	}
+    	else{
+    		$resp['err4']=abort(404)->render();
+    	}
+    	return response()->json($resp);
+
 
     }
     //admin view event
