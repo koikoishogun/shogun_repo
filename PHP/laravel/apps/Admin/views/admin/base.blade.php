@@ -1,24 +1,23 @@
 <!DOCTYPE html>
 <html>
-	<head>
+  <head>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <link href="{{ URL::asset('/css/bootstrap.min.css')}}" rel="stylesheet">
-	<link href="/css/admin.css" rel="stylesheet">
+  <link href="/css/admin.css" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="/css/jquery.datetimepicker.css"/ >
     <link rel="stylesheet" type="text/css" href="{{URL::asset('/css/cropper.min.css')}}">
-	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700,900" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700,900" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <script src="https://cdn.ckeditor.com/4.9.2/standard/ckeditor.js"></script>
      
-    <script type="text/javascript" src="{{ URL::asset('/js/jquery-3.2.1.min.js')}}"></script>
-    <script type="text/javascript" src="{{ URL::asset('/js/bootstrap.min.js')}}"></script>
-    <script type="text/javascript" src="{{ URL::asset('/js/admin/admin.js')}}"></script>
-    <script type="text/javascript" src="{{ URL::asset('/js/custom.js')}}"></script>
-    <script type="text/javascript" src="{{ URL::asset('/js/cropper.min.js')}}"></script>
-	
-		   
+    <script type="text/javascript" src="/js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/custom.js"></script>
+   <script type="text/javascript" src="/js/admin/admin.js"></script>
+  
+       
        <!-- Loader style   -->
            <style>
         .loader {
@@ -48,17 +47,20 @@
         }
            </style>
             <title>Admin Panel</title>
-            @yield("head")
-	</head>
-	<body>
+         
+  </head>
+  <body>
+              
               <div class="magic">
-                @yield("body")
+               
+               @yield("body")
+
                 
               </div>
                      
               
-		
-		 
+    
+     
 
      <!-- Modal -->
         <div id="loadModal" class="modal"  tabindex="-1" role="dialog"  aria-hidden="true" data-backdrop="static">
@@ -105,5 +107,5 @@
           </div>
         </div>
 
-	</body>
+  </body>
 </html>

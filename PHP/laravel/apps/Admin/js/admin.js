@@ -16,8 +16,9 @@
      *Lgin admin
 
      */
+   
    //login admin
-   $("body").on("submit","#loginAdmin",function(e){
+   $(document).on("submit","##login-form",function(e){
     e.preventDefault();
     e.stopImmediatePropagation();
     //alert(window.location.pathname);
@@ -62,7 +63,7 @@
    });
 
    //logout admin 
-   $("body").on("click",".logout-btn",function(e){
+   $(document).on("click",".logout-btn",function(e){
       e.preventDefault();
       e.stopImmediatePropagation();
       
@@ -97,9 +98,10 @@
         var pass=2018;
         dat['url']="/add/user/"+nan+"/"+nasd+"/"+pass; 
         dat['data']=data;
+        var sel=$(".userHome");
       
         dat['success']=function(data){
-          customResp(data);
+          customResp(data,sel);
 
         }
         ajaxGET(dat);
@@ -113,12 +115,22 @@
      e.preventDefault();
      e.stopImmediatePropagation();
      //get id for user
-     var idi=$("#userId").val()
+     var idi=$(this).parents(".usersDiv").find("#dfg").val()
      //check if true
      if (idi) {
+      var ty=new FormData();
+      ty.append("id",idi);
+      var dat=[];
+      dat["url"]="/delete/user";
+      dat['data']=ty;
+      dat['success']=function(data){
+        customResp(data);
+      }
+      ajaxPost(dat);
 
      }
 
 
 
    });
+   //update admin

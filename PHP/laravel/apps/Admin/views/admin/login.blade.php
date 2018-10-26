@@ -1,10 +1,5 @@
 @extends("admin.base")
-@section("head")
 
-
-
-
-@endsection
 
 @section("body")
   <div class="adminContent">   

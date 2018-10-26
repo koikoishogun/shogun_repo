@@ -1,4 +1,4 @@
- // add new post
+// add new post
       $("body").on("submit","#postForm",function(e){
              e.preventDefault();
              e.stopImmediatePropagation();
@@ -126,9 +126,9 @@
          //var pId=$("#pId").val();
 
          //make ajax call
-         var id=$(this).parents(".postDiv").children("#pId").val();
+         var id=$(".postDiv #pId").val();
          var dat=[];
-         var sd=$(this).parents(".adminContent");
+         var sd=$(this).parents(".loadContent");
          //dat["data"]={"post_id":};
          dat["url"]="/blog/delete/"+id;
          dat["success"]=function(data){
@@ -152,7 +152,8 @@
             e.preventDefault();
             e.stopImmediatePropagation();
             //alert("test");
-            var id=$(this).parents(".postDiv").find("#pId").val();
+            var id=$(".postDiv").find("#pId").val();
+            console.log("id is"+id.length);
                 var dat=[];
                 dat['url']="/post/update/form/"+id;
                 var sel=$(this).parents(".blogHome").find(".middle-section");
@@ -163,65 +164,65 @@
 
                 }
                 ajaxGET(dat);
-
-          
-           
-
-
-
-
-
-
-      });
+       });
 
       //save updated post
       $("body").on("submit","#upPost",function(e){
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        var dat=[];
-        //dat['data']=new FormData(this);
-        //Add form data
-        var thisForm=new FormData();
-        //add title
-        var title=$("#blogTitle").val();
-        thisForm.append("title",title);
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var dat=[];
+            //dat['data']=new FormData(this);
+            //Add form data
+            var thisForm=new FormData();
+            //add title
+            var title=$("#blogTitle").val();
+            thisForm.append("title",title);
 
-        //Add blog article
-        var article=$("#blogArticle").val();
-        thisForm.append("text",article);
+            //Add blog article
+            var article=$("#blogArticle").val();
+            thisForm.append("text",article);
 
-        //Add blog tag
-        var tag=$("#blogTags").val();
-        thisForm.append("tag",tag);
+            //Add blog tag
+            var tag=$("#blogTags").val();
+            thisForm.append("tag",tag);
 
-        //Add  blog update header image
-        var hi=$(".headerImgs").children(".imageTyt").val();
+            //Add  blog update header image
+            var hi=$(".headerImgs").find(".imageTyt").val();
+            //console.log(hi);
+            //check for header
+            if (hi) {
+             thisForm.append("headerImage",hi); 
+            }
 
-        thisForm.append("headerImage",hi);
+            
 
 
-        //Add footer images for blog update form
-        var fi=$(".showFooterdivs").children(".imageTyt");
-        fi.each( function(index,element){
+            //Add footer images for blog update form
+            var fi=$(".showFooterdivs").find(".imageTyt");
+            //check for footer
+            if (fi.length ) {
+                 fi.each( function(index,element){
+                 thisForm.append("footerImages[]",$(this).val());
+                });
 
-          thisForm.append("footerImages[]",$(this).val());
-        });
+            }
+            
 
-        //Add post id
-        var piid=$("#postId").val();
-        thisForm.append("postId",piid);
+            //Add post id
+            var piid=$("#postId").val();
+            thisForm.append("postId",piid);
 
-        dat['data']=thisForm;
+            dat['data']=thisForm;
 
-        dat['url']="/save/updated/blog";
-        var select=$(this).parents(".blogHome").find(".middle-section");
-        //console.log(select);
-        dat['success']=function(data){
-            //var select=".blogHome";
-            customResp(data,select);
+            dat['url']="/save/updated/blog";
+            var select=$(this).parents(".blogHome").find(".middle-section");
+            //console.log(select);
+            dat['success']=function(data){
+                //var select=".blogHome";
+                customResp(data,select);
 
-        }
-        ajaxPost(dat);
+            }
+            ajaxPost(dat);
 
 
 
@@ -391,7 +392,7 @@
       $("body").on("click",".cmtReply",function(e){
         e.preventDefault();
         e.stopImmediatePropagation();
-        var is=$(this).parents(".showCmt").find("#cid").val();
+        var is=$(this).parents(".showCmt").find("#cId").val();
         var dat=[];
         var sel=$(this).parents(".showCmt").find(".repliesHere");
         dat['url']="/admin/reply/"+is;
@@ -405,23 +406,7 @@
 
       });
 
-      //return admin relply home
-      $("body").on("click",".cmtReply",function(e){
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        var is=$(this).parents(".showCmt").find("#cid").val();
-        var dat=[];
-        var sel=$(this).parents(".showCmt").find(".repliesHere");
-        dat['url']="/admin/reply/"+is;
-        dat['success']=function(data){
-            customResp(data,sel);
-
-        }
-        ajaxGET(dat);
-        
-
-
-      });
+      
 
       //delete admin reply
       $("body").on("click",".delREply", function(e){
@@ -443,10 +428,11 @@
       });
 
 
-            //trigger click for header upload on post
+       //trigger click for header upload on post
       $('body').on("click",".uploadHeader",function(e){
           e.preventDefault();
           e.stopImmediatePropagation();
+          //alert("test");
           var dat=[];
           dat['sel']=$("#headerFile");
           fileClick(dat);
@@ -509,30 +495,29 @@ $("body").on("change","#headerFile",function(e){
     e.preventDefault();
     e.stopImmediatePropagation();
     //handleFileSelect(e,"showHeader");
-    var sel=$("#showHeader")
-    addInput("#headerFile",sel);
+    var data=[];
+    data["selector"]="#headerFile";
+    data["load"]=$("#showHeader");
+    data['url']="/header/post";
+    //var sel=$("#showFooterImage");
+    //addInput(".footerImage",sel);
+    addInput(data);
     //hide header photo btn
     $(".uploadHeader").hide();
-    //add  image area select for header image
-    
- //alert("hit");
-
-   
-
-
-    
-
-  
-
- });
+});
 
 //get on change event for footer image
 $("body").on("change",".footerImage",function(e){
     e.preventDefault();
     e.stopImmediatePropagation();
     //handleFileSelect(e,"showHeader");
-    var sel=$("#showFooterImage")
-    addInput(".footerImage",sel);
+    var data=[];
+    data["selector"]=".footerImage";
+    data["load"]=$("#showFooterImage");
+    data['url']="/header/post";
+    //var sel=$("#showFooterImage");
+    //addInput(".footerImage",sel);
+    addInput(data);
 
 
 
@@ -540,14 +525,15 @@ $("body").on("change",".footerImage",function(e){
 
 });
 
-//delete an image from blog  form
-$("body").on("click",".delUploadPhoto",function(e){
+//delete an  header image from blog  form
+$("body").on("click","#postForm .delUploadPhoto",function(e){
+  
       e.preventDefault();
       e.stopImmediatePropagation();
       var hut=$(this).parents(".imageDiv");
       var is=$(this).parents(".imageDiv").find(".imageTyt").val();
       var dat=[];
-      var sel=$("fgfdg");
+      var sel=$(this).parents(".imageDiv");
       dat['url']="/del/upload/pic/"+is;
       dat['success']=function(data){
           hut.remove();
@@ -561,30 +547,206 @@ $("body").on("click",".delUploadPhoto",function(e){
 
 
 
-}); 
+});
+//delete header for blog update form
+$("body").on("click","#upPost .headerImgs .delUploadPhoto",function(e){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    //alert('shit');
+    var hu=$(".headerImgs  .imageDiv");
+    var fid=hu.find(".imageTyt").val();
+    var sho=$(".showUploadHeaderBtn");
+    //console.log("shiet");
+    if (fid ) {
+      var data=[];
+      data['url']="/del/upload/pic/"+fid;
+      data['success']=function(data){
 
-//add link fo blog
-$("body").on("click",".linkAdd",function(e){
-       e.preventDefault();
-      e.stopImmediatePropagation();
-      var id =$("#pId").val();
-      var link=$("#linkVava").val();
-      var dat=[];
-      dat['url']="/add/link/"+link+"/"+id;
-      var sel=$(".linkDiv");
-      dat['success']=function(data){
-          //hut.remove();
-          //$(".uploadHeader").show();
-          customResp(data,sel);
+        customResp(data);
+        //show header upload btn
+        sho.show();
+        hu.remove();
 
-          //alert("Reply deleted successfully.");
 
       }
-      ajaxGET(dat);
+      ajaxGET(data);
+      
+
+    }
+
+}   );
+
+//delete footer image for update blog form
+$("body").on("click",".footerImages .showFooterdivs .delUploadPhoto",function(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  var huyu=$(this).parents(".imageDiv");
+  
+  var fid=huyu.find(".imageTyt").val();
+    //console.log("File id is "+fid);
+    if (fid ) {
+
+
+      
+      var data=[];
+      data['url']="/del/upload/pic/"+fid;
+      data['success']=function(data){
+        
+      customResp(data);
+     
+      huyu.remove();
+
+
+
+      }
+      ajaxGET(data);
+      
+
+    }
 
 
 
 });
+
+//trigger click for upload header input button on blog update form
+
+$("body").on("click",".upHBtn",function(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  var dada=[];
+  dada['sel']=$("#updateHeader");
+  fileClick(dada);
+
+
+
+});
+
+//trigger click for footer file btn on blog update form
+$("body").on("click",".footerImgBtn",function(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  var dada=[];
+  dada['sel']=$("#footerImage");
+  fileClick(dada);
+
+
+});
+
+//get on change event for  header on update post form
+$("body").on("change","#updateHeader",function(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  var data=[];
+  data["selector"]="#updateHeader";
+  data["load"]=$(".headerImgs");
+  data["url"]="/header/post";
+  //var sese=$(".headerImgs");
+  //addInput("#updateHeader",sese);
+  addInput(data);
+  $(".showUploadHeaderBtn").hide();
+
+}   );
+
+//get on change  event for footer file on blog update form
+$("body").on("change","#footerImage",function(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  var data=[];
+  data["selector"]="#footerImage";
+  data["load"]=$(".showFooterdivs");
+  data["url"]="/header/post";
+  //var serty=$(".showFooterdivs");
+  addInput(data);
+});
+
+/*
+* Link starts here
+*
+*
+*
+*
+*
+*
+**/
+
+//add link to blog post
+$("body").on("submit","#linkForm",function(e){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      //alert('hit');
+      //get data 
+      var dat=new FormData(this);
+      var sel=$(".linkShown");
+      //check if exists
+      if (dat) {
+        //save to array
+        var ds=[];
+        ds['data']=dat;
+        ds['url']="/add/link";
+        ds['success']=function(data){
+          customResp(data,sel);
+
+        }
+        ajaxPost(ds);
+      }
+      
+
+
+
+});
+
+//delete link for a particular post
+$("body").on("click",".linkDel",function(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  //get post
+  var popo=$("#pId").val();
+  if (popo) {
+    var dada=new FormData();
+    dada.append("id",popo);
+    var sel=$(".linkShown");
+    console.log(sel);
+    //save 
+    var tyty=[];
+    tyty['data']=dada;
+    tyty['url']="/delete/link";
+    tyty['success']=function(data){
+      customResp(data,sel);
+
+    }
+    ajaxPost(tyty);
+
+  }
+
+}   );
+
+//update link for a particular post
+$("body").on("click",".linkUpdate",function(e){
+  e.stopImmediatePropagation();
+  var das=new FormData();
+  var lolo=$(".linkInput").val();
+  var ida=$("#pId").val();
+  //check 
+  if (lolo && ida) {
+    das.append("link",lolo);
+    das.append("id",ida);
+    var dayu=[];
+    var sel=$(".linkShown");
+    dayu['data']=das;
+    dayu['url']="/link/update/form";
+    dayu['success']=function(data){
+      customResp(data,sel);
+
+    }
+    ajaxPost(dayu);
+
+  }
+  
+
+
+});
+
+
 $.fn.equals = function(compareTo) {
   if (!compareTo || this.length != compareTo.length) {
     return false;
@@ -598,130 +760,25 @@ $.fn.equals = function(compareTo) {
 };
 
 
-
-//delete either a header image or footer for blog update form
-$("body").on("click",".delHeader",function(e){
-	e.preventDefault();
-	e.stopImmediatePropagation();
-	//get file id and delete from DB
-	//get id of file
-	//check for which selector has been selected
-	  	//check if header
-	  	/*var delHead=$(".delHeader");
-	  	var delFooter=$(".delFooter");
-	  	//perform get request
-	  	
-	     var huyu=$(this);
-	  	if ( huyu.equals(delHead)    ) {
-	  		sel=$(".headerImgs");
-
-	  	}
-	  	else if( huyu.equals(delFooter)     ){
-	  		sel=$(".footerImages");
-
-	  	}
-	  	else {
-	  		sel=null;
-	  	}
-	  	console.log("sel is"+sel);*/
-	  	var hu=$(this);
-	  	var sel=$(".headerImgs");
-	  var fid=$(this).children(".imageTyt").val();
-	  //console.log("File id is"+fid);
-	  if (fid ) {
+//save admin reply
+$("body").on("submit",".adminReply",function(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  var dat=[];
+  var huyu=$(this);
+  var ss=$(this).parents(".replyContainer").find(".loadReply");
+  dat['url']="/admin/reply";
+  dat['data']=new FormData(this);
+  dat['success']=function(data){
+    huyu[0].reset();
+    customResp(data,ss);
 
 
-	  	
-	    var data=[];
-	    data['url']="/del/upload/pic/"+fid;
-	    data['success']=function(data){
+  }
 
-		    customResp(data,sel);
-		    //show header upload btn
-		    $(".showUploadHeaderBtn").show();
-		       hu.remove();
+  ajaxPost(dat);
 
-
-	    }
-	    ajaxGet(data);
-	  	
-
-	  }
-
-}   );
-
-//delete footer image for update blog form
-$("body").on("click",".delFooter",function(e){
-	e.preventDefault();
-	e.stopImmediatePropagation();
-	var huyu=$(this);
-	var sel=null;
-	var fid=$(this).find(".imageTyt").val();
-	  //console.log("File id is"+fid);
-	  if (fid ) {
-
-
-	  	
-	    var data=[];
-	    data['url']="/del/upload/pic/"+fid;
-	    data['success']=function(data){
-        
-	    customResp(data,sel);
-	    //show header upload btn
-	    $(".showUploadHeaderBtn").show();
-	    //remove deleted pic
-	    huyu.remove();
-
-
-
-	    }
-	    ajaxGet(data,sel);
-	  	
-
-	  }
 
 
 
 });
-
-//trigger click for upload header input button on blog update form
-
-$("body").on("click",".upHBtn",function(e){
-	e.preventDefault();
-	e.stopImmediatePropagation();
-	var dada=[];
-	dada['sel']=$("#updateHeader");
-	fileClick(dada);
-
-
-
-});
-
-//trigger click for footer file btn on blog update form
-$("body").on("click",".footerImgBtn",function(e){
-	e.preventDefault();
-	e.stopImmediatePropagation();
-	var dada=[];
-	dada['sel']=$("#footerImage");
-	fileClick(dada);
-
-
-});
-
-//get on change event for  header on update post form
-$("body").on("change","#updateHeader",function(e){
-	e.preventDefault();
-	e.stopImmediatePropagation();
-	var sese=$(".headerImgs");
-	addInput("#updateHeader",sese);
-
-}   );
-
-//get on change  event for footer file on blog update form
-$("body").on("change","#footerImage",function(e){
-	e.preventDefault();
-	e.stopImmediatePropagation();
-	var serty=$(".showFooterdivs");
-	addInput("#footerImage",serty);
-});
-

@@ -70,31 +70,32 @@ class adminController extends Controller
         
 
     }
+   
     //add a new user instance
-    public function add_admin(string $email,string  $password,string $name){
+    public function add_admin(string $name,string $email,string  $password){
         $pas=bcrypt($password);
         $det=["name"=>$name,"email"=>$email,"password"=>$pas];
-        $ad=User::create($det);
+        $ad=us::create($det);
         if($ad){ 
             $det['users']=[];
             //view of users
-            foreach ($ad as  $value) {
-                $data=[];
-                $data['name']=$value->name;
-                $data['email']=$value->email;
-                $resp['users']=$data;
-                
-            }
+             $data=[];
+            $data['name']=$ad->name;
+            $data['email']=$ad->email;
+            $resp['users']=$data;
+           
             //check if emoty
             if (!empty($det['users'])) {
+                $erty=view("admin.userHome",$det)->render();
                 
             }
             else{
+             $erty=view("admin.userHome")->render();
+
                 
             }
-            $erty=view("admin.addUserHome",)->render();
-        
-           $resp['msg']="Success.User ".$name." added .";  
+            $resp['html']=$erty;
+            $resp['msg']="Success.User ".$name." added .";  
         
         }else{
             $resp['error']="Error.Failed to create user.";
@@ -119,11 +120,11 @@ class adminController extends Controller
                     $dex=us::destroy($er);
                     //check if success fully destroyed
                     if ($dex) {
-                        $resp['msg']="Success.User ".$name." deleted"
+                        $resp['msg']="Success.User ".$name." deleted";
                     }
                     else{
 
-                        $resp['error']="Oops...something happened."
+                        $resp['error']="Oops...something happened.";
                     }
 
                     
@@ -147,7 +148,7 @@ class adminController extends Controller
     //return add user form
     public function addUserHome(){
         //get all users
-        $ty=us::all();
+        $ty=us::orderBy("created_at","desc")->SimplePaginate(10);
         $det['users']=[];
            if ($ty) {
                 //loop and save to array
@@ -155,6 +156,8 @@ class adminController extends Controller
                     $data=[];
                     $data['name']=$value->name;
                     $data['email']=$value->email;
+                    $data['created']=$value->created_at->diffForHumans();
+                    $data['updated']=$value->updated_at->diffForHumans();
                     $det['users']=$data;
                     
                 }
