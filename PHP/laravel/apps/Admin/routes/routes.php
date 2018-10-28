@@ -25,4 +25,7 @@ Route::get("/add/user/{name}/{email}/{password}","adminController@add_admin");
 Route::post("/delete/user","adminController@del_admin");
 
 //return user create  home with form
-Route::get("/user/home","adminController@addUserHome");
+Route::get("/user/home","adminController@userHome");
+
+//view users
+Route::get("/view/users","adminController@viewUsers");

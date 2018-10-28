@@ -12,16 +12,16 @@ class adminController extends Controller
    
     //return home for admin
     public function home(){
-    	$home=view("admin.home");
-    	//$resp["html"]=$home;
-    	//return response()->json($resp);
+        $home=view("admin.home");
+        //$resp["html"]=$home;
+        //return response()->json($resp);
         return $home;
 
 
 
     }
     public  function loginAdmin(Request $request){
-    	//return "hit";
+        //return "hit";
         if(  $request->isMethod("POST")  ){
             $det=["email"=>$request->email ,"password"=>$request->password];
             //check  credentials
@@ -51,11 +51,11 @@ class adminController extends Controller
 
     }
     public function adminLoginForm(){
-    	return view("admin.login");
+        return view("admin.login");
     }
    
     public function logout(){
-    	//return "test";
+        //return "test";
         $ert=Auth::logout();
         if ( !$ert) {
             
@@ -70,7 +70,6 @@ class adminController extends Controller
         
 
     }
-   
     //add a new user instance
     public function add_admin(string $name,string $email,string  $password){
         $pas=bcrypt($password);
@@ -121,6 +120,11 @@ class adminController extends Controller
                     //check if success fully destroyed
                     if ($dex) {
                         $resp['msg']="Success.User ".$name." deleted";
+                        //return view for users
+                        $qw=$this->userView();
+                        if ($qw) {
+                            $resp['html']=$qw;
+                        }
                     }
                     else{
 
@@ -145,26 +149,65 @@ class adminController extends Controller
         return response()->json($resp);
 
     }
-    //return add user form
-    public function addUserHome(){
+    //return view for all users
+    public function userView(){
+        //get all users
+        $wer=us::orderBy("created_at","desc")->SimplePaginate(10);
+        $de=[];
+        if ($wer) {
+           //loop and save to array
+            foreach ($wer as  $value) {
+                $data=[];
+                 $data['id']=$value->id;
+                $data['name']=$value->name;
+                $data['email']=$value->email;
+                $data['created']=$value->created_at->diffForHumans();
+                $data['updated']=$value->updated_at->diffForHumans();
+                $de[]=$data;
+                
+            }
+            if (!empty($de)) {
+                $det['users']=$de;
+                $resp['html']=view("admin.view",$det)->render();
+            }
+            
+            
+        }
+        else{
+             $resp['html']=view("admin.view")->render();
+        }
+        return response()->json($resp);
+
+
+    }
+    
+    //return add user home
+    public function userHome(){
         //get all users
         $ty=us::orderBy("created_at","desc")->SimplePaginate(10);
-        $det['users']=[];
+        $rey=[];
            if ($ty) {
                 //loop and save to array
                 foreach ($ty as  $value) {
                     $data=[];
+                    $data['id']=$value->id;
                     $data['name']=$value->name;
                     $data['email']=$value->email;
                     $data['created']=$value->created_at->diffForHumans();
                     $data['updated']=$value->updated_at->diffForHumans();
-                    $det['users']=$data;
+                    $rey[]=$data;
                     
                 }
-                $resp['html']=view("admin.form",$det)->render();
+               
+                if (! empty($rey)) {
+                    $det['users']=$rey;
+                   $resp['html']=view("admin.userHome",$det)->render();
+                }
+               
+                
            }
            else{
-            $resp['html']=view("admin.form")->render();
+            $resp['html']=view("admin.userHome")->render();
            }
         
         return response()->json($resp);

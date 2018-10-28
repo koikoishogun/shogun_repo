@@ -103,7 +103,8 @@ class msg extends Controller
 		if($msgss){
 			//return "Message deleted successfully";
 			$msg="Message deleted successfully";
-		     return redirect()->action("msg@view_msg",[$msg]);
+		     $er=$this->view_msg($message,$msg);
+		     return $er;
 			
 		}
 		else{

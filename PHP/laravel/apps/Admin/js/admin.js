@@ -18,7 +18,7 @@
      */
    
    //login admin
-   $(document).on("submit","##login-form",function(e){
+   $(document).on("submit","#loginAdmin",function(e){
     e.preventDefault();
     e.stopImmediatePropagation();
     //alert(window.location.pathname);
@@ -111,9 +111,11 @@
 
    });
    //delete admin instance
-   $("body").on("click",".delUser",function(e){
+   $(document).on("click",".delUser",function(e){
      e.preventDefault();
      e.stopImmediatePropagation();
+     //remove after del
+     var qw=$(this).parents(".usersDiv");
      //get id for user
      var idi=$(this).parents(".usersDiv").find("#dfg").val()
      //check if true
@@ -125,6 +127,7 @@
       dat['data']=ty;
       dat['success']=function(data){
         customResp(data);
+        qw.remove();
       }
       ajaxPost(dat);
 

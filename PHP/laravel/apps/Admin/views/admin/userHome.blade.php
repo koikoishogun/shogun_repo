@@ -1,10 +1,11 @@
 <div class="userHome">
 	<div class="listUsers">
 		@if( isset($users)  && !empty($users)  )
-		   @foreach( $sers as $er)
-		      <div clas="usersDiv">
-		      	<input type="hidden" id="dfg" value="{{$er->id}}">
-		      	Created:{{$er['time']}}
+		   @foreach( $users as $er)
+		      <div class="usersDiv">
+		      	   <input type="hidden" id="dfg" value="{{$er['id']}}">
+			      	Created:{{$er['created']}}
+			      	Updated:{{$er['updated']}}
 		      	  Name:{{ $er['name']}}&nbsp;
 		      	  Email:{{$er['email']}}
 		      	  <button type="button" class="delUser">Delete</button>

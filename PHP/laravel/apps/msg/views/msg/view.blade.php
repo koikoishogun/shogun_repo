@@ -1,57 +1,31 @@
-			
-				@if( isset($msg) && $msg->isNotEmpty($msg)  && isset($count)  )
-					
-			<div class="msg_div enquiries">
-				<div class="messages-wrapper">
-					
-					<div class="message-count">
-							<h4>Total Messages:</h4>
-							<h4>{{$count}}</h4>
-					</div>
+<script type="text/javascript" src="/js/admin/msg.js"></script>
 
-					@foreach( $msg as $value )
+<div class="msg_div">
 
-					<div class="admin-messages">		
-						<div class="admin-messages-header">
-							<img src="/img/avatar.svg">
-							
-							<div class="messages-header-details">
-								<h3>{{$value->name}}</h3>
-								
-								<div class="admin-messages-details">
-									<p><i class="fa fa-phone-square"></i> {{$value->phone}}</p>
-									<p><i class="fa fa-envelope-open"></i> {{$value->email}}</p></p>
-								</div>
-							</div>
-						</div>
-
-						<div class="admin-message-text">
-							<input type="hidden"  value="{{$value->id}}" class="mkjasdf">
-							<h4>Message:</h4>
-							<p>{{$value->message}}</p>
-							<h5>{{$value->created_at->diffForHumans() }}</h5>
-						</div>
-
-						<div class="actions">
-						     <a href="#" id="{{$value->id}}" class="del_msg"><i class="fa fa-trash"></i> delete</a>&nbsp&nbsp
-						     <a href="mailto:{{$value->email}}?subject=Question"><i class="fa fa-reply"></i> Reply</a>
-						</div>
-					</div>
-					@endforeach
-				</div>
+  @if( isset($msg)  && $msg->isNotEmpty() && isset($count)   )
+	
+	<div class="message-count">
+		Total messages:{{$count}}
+	</div>
+	  @foreach( $msg as $value )
+		<div class="message-holder msg_div">
+			<input type="hidden" id="mid" value="{{$value->id}}">
+			<img class="message-avatar" src ="{{ URL::asset('/images/admin/avatar.png')}}">
+            <div class="message-content-holder">
+				<h3><b>{{$value->name}}</b></h3>
+				<p><b>t:</b> {{$value->phone}} &nbsp;&nbsp; <b>e:</b> {{$value->email}}<br>
+				
+				<h4 class="message-title">Message:</h4>
+				<p>{{$value->message}}</p>
+				<p class="gray">{{  $value->created_at->diffForHumans()}}</p>
+				 <input type="hidden"  value="{{$value->id}}"  id="msg" />
+				 <button type="button" class="del_msg" >Delete</button>
 			</div>
-				    
+		</div>		 
+      @endforeach
+  @else
+	  <p>No messages placed  yet</p>
+  @endif
 
-				    @else
-									<div class="message-holder">
-										<div class="no-message-wrapper">
-											<img src="/img/inbox.svg">
-												
-											<div class="no-message-msg">
-												<h1 class="">Inbox Empty!</h1>
-												<p>You do not have messages at the moment</p>
-											</div>
-										</div>
-									</div>
-					@endif
-			
+
+</div>
