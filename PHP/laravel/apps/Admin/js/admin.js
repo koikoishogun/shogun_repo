@@ -89,9 +89,9 @@
       //get data
       //var data=new FormData(this);
       //get name
-      var nan=$("#userName").val();
+      var nan=$(this).find("#userName").val();
       //get email
-      var nasd=$("#userEmail").val();
+      var nasd=$(this).find("#userEmail").val();
       var dat=[];
       //check if exists
       if ( nan && nasd) {
@@ -105,6 +105,10 @@
 
         }
         ajaxGET(dat);
+      }
+      else{
+        $(".load_msg").empty().html("<p>Oops...An error occured.</p>");
+        $("#mlo").modal("show");
       }
       
 

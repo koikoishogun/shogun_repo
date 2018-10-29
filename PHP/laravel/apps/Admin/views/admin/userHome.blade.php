@@ -16,10 +16,10 @@
 		   <p>No users set.</p>
 		@endif
 	</div>
-	<form id="userForm" class="login-form">
-		@csrf
-		<input type="email" name="email" id="userEmail" required>
-		<input type="text" name="name"  id="userName" required>
+	<form id="userForm" >
+		{{csrf_field()}}
+		<input type="email" name="email" id="userEmail"  placeholder="Enter email"  required>
+		<input type="text" name="name"  id="userName"  placeholder="Enter name" required>
 		<input type="submit" value="Add User">
 	</form>
 </div>
